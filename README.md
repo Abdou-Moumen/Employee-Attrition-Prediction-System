@@ -1,5 +1,3 @@
-# GitHub README.md
-
 # Employee Attrition Prediction System
 
 Predict employee attrition before they resign and vanish into another company’s onboarding process.
