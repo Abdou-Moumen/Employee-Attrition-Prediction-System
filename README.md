@@ -33,15 +33,7 @@ This project uses Machine Learning to identify employees at risk of leaving base
 ## Project Structure
 
 ```bash
-employee-attrition/
-│── data/
-│   └── HR.csv
-│── notebooks/
-│   └── attrition.ipynb
-│── model/
-│   └── attrition_model.pkl
-│── requirements.txt
-│── README.md
+attrition_project/ │── attrition_project/ │── predictor/ │── images/ │── Testing Data/ │── HR.csv │── Model_Code.py │── attrition_model.pkl │── manage.py │── requirements.txt │── README.md
 ```
 
 ---
