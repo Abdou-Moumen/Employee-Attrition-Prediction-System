@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Prediction</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #111827, #1e1b4b, #312e81);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 50px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(14px);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 { margin: 0; font-size: 34px; letter-spacing: -1px; }
+        .header p { margin-top: 12px; color: #d1d5db; font-size: 16px; }
+
+        .upload-box {
+            border: 2px dashed rgba(255, 255, 255, 0.45);
+            border-radius: 20px;
+            padding: 40px 25px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.08);
+            transition: 0.25s ease;
+        }
+        .upload-box:hover {
+            border-color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            max-width: 420px;
+            padding: 14px;
+            background: #ffffff;
+            color: #111827;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button {
+            margin-top: 22px;
+            padding: 14px 34px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.45);
+            transition: 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+        .btn-reset:hover {
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .error {
+            margin-top: 25px;
+            padding: 16px 18px;
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            color: #fecaca;
+            border-radius: 14px;
+        }
+
+        /* ── Summary cards ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-top: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 18px 14px;
+            text-align: center;
+        }
+
+        .summary-card .card-number {
+            font-size: 32px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .summary-card .card-label {
+            font-size: 13px;
+            color: #d1d5db;
+            margin-top: 6px;
+        }
+
+        .card-total    .card-number { color: #a5b4fc; }
+        .card-yes      .card-number { color: #fca5a5; }
+        .card-no       .card-number { color: #6ee7b7; }
+        .card-critical .card-number { color: #f87171; }
+        .card-high     .card-number { color: #fb923c; }
+        .card-medium   .card-number { color: #facc15; }
+        .card-low      .card-number { color: #4ade80; }
+
+        /* ── Table ── */
+        .results-card {
+            margin-top: 25px;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: rgba(99, 102, 241, 0.9); }
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        td {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 15px;
+        }
+        tbody tr:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .badge {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .yes     { background: rgba(239,68,68,0.2);    color: #fecaca; border: 1px solid rgba(248,113,113,0.5); }
+        .no      { background: rgba(34,197,94,0.2);    color: #bbf7d0; border: 1px solid rgba(74,222,128,0.5); }
+        .unknown { background: rgba(255,255,255,0.15); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.35); }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px; }
+            .header h1 { font-size: 26px; }
+            th, td { padding: 13px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <h1>Employee Attrition Prediction</h1>
+            <p>Upload a CSV file. Each row will get one prediction.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="upload-box">
+                <input type="file" name="csv_file" accept=".csv" required id="csv-input">
+                <br>
+                <div class="btn-group">
+                    <button type="submit">Predict CSV</button>
+                    <button type="button" class="btn-reset" onclick="resetForm()">Reset</button>
+                </div>
+            </div>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if summary %}
+            <div class="summary-grid">
+                <div class="summary-card card-total">
+                    <div class="card-number">{{ summary.total }}</div>
+                    <div class="card-label">Total Employees</div>
+                </div>
+                <div class="summary-card card-yes">
+                    <div class="card-number">{{ summary.yes }}</div>
+                    <div class="card-label">Will Leave</div>
+                </div>
+                <div class="summary-card card-no">
+                    <div class="card-number">{{ summary.no }}</div>
+                    <div class="card-label">Will Stay</div>
+                </div>
+                <div class="summary-card card-critical">
+                    <div class="card-number">{{ summary.critical }}</div>
+                    <div class="card-label">Critical Risk</div>
+                </div>
+                <div class="summary-card card-high">
+                    <div class="card-number">{{ summary.high }}</div>
+                    <div class="card-label">High Risk</div>
+                </div>
+                <div class="summary-card card-medium">
+                    <div class="card-number">{{ summary.medium }}</div>
+                    <div class="card-label">Medium Risk</div>
+                </div>
+                <div class="summary-card card-low">
+                    <div class="card-number">{{ summary.low }}</div>
+                    <div class="card-label">Low Risk</div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if results %}
+            <div class="results-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee Row</th>
+                            <th>Prediction</th>
+                            <th>Probability</th>
+                            <th>Risk Band</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                            <tr>
+                                <td>Employee {{ forloop.counter }}</td>
+                                <td>
+                                    {% if row.Prediction == "Yes" %}
+                                        <span class="badge yes">Yes</span>
+                                    {% elif row.Prediction == "No" %}
+                                        <span class="badge no">No</span>
+                                    {% else %}
+                                        <span class="badge unknown">{{ row.Prediction }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.Probability }}</td>
+                                <td>
+                                    {% if row.RiskBand == "Critical" %}
+                                        <span class="badge yes">Critical</span>
+                                    {% elif row.RiskBand == "High" %}
+                                        <span class="badge yes">High</span>
+                                    {% elif row.RiskBand == "Medium" %}
+                                        <span class="badge unknown">Medium</span>
+                                    {% else %}
+                                        <span class="badge no">Low</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <script>
+        function resetForm() {
+            window.location.href = window.location.pathname;
+        }
+    </script>
+
+</body>
+</html>
